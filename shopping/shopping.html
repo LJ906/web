@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title></title>
+    <style>
+        body, ul, li, p {
+            padding: 0;
+            margin: 0;
+        }
+
+        ul, li {
+            list-style: none;
+        }
+    h4 {
+        width: 1000px;
+        height: 30px;
+        margin:10px auto;
+        font: 22px/30px Microsoft yahei;
+    }
+        #shopping {
+            display: flex;
+            width: 1000px;
+            height: 230px;
+            margin: 0 auto;
+            border: 2px solid #ccc;
+        }
+
+        #shopping li {
+            flex: 1;
+            padding: 10px;
+            height: 100%;
+            text-align: center;
+            box-sizing: border-box;
+        }
+
+        #shopping img {
+            width:100%;
+            /*padding: 0 20px;*/
+            border-radius: 10px;
+        }
+
+        #shopping span {
+            padding-right: 20px;
+        }
+
+        /*结账区*/
+
+        #car {
+            position: relative;
+            width: 600px;
+            min-height: 200px;
+            margin: 20px auto;
+            padding: 0 10px 40px 10px;
+            border: 1px solid red;
+            border-radius: 10px;
+        }
+
+        #car li {
+            width: 600px;
+            height: 40px;
+            line-height: 40px;
+            border-bottom: 1px dashed #138a64;
+        }
+
+        #car span {
+            display: block;
+            float: left;
+            height: 40px;
+            text-align: center;
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+        }
+
+        #car span:first-child,
+        #car span:last-child {
+            width: 90px;
+        }
+
+        #car span:nth-child(2) {
+            width: 100px;
+
+        }
+
+        #car span:nth-child(3) {
+            width: 280px;
+        }
+
+        #car img {
+            width: 40px;
+            height: 40px;
+        }
+
+        /*总价格*/
+        .total {
+            position: absolute;
+            left: 0;
+            bottom:0;
+            width: 100%;
+            height: 40px;
+            line-height: 40px;
+            text-align: right;
+        }
+
+    </style>
+</head>
+<body>
+
+<!--需求：实现拓拽自动计算总件数及价格-->
+<!--<div class="shopping">-->
+<h4>蛋糕新品上市</h4>
+<ul id="shopping">
+    <li draggable="true">
+        <img src="img/cheese.png"/>
+        <span>纽约芝士蛋糕</span>
+        <span>220￥</span>
+    </li>
+    <li draggable="true">
+        <img src="img/chocolate.png"/>
+        <span>森林狂想曲蛋糕</span>
+        <span>200￥</span>
+    </li>
+    <li draggable="true">
+        <img draggable="true" src="img/coconut.png"/>
+        <span>椰香森林蛋糕</span>
+        <span>168￥</span>
+    </li>
+    <li draggable="true">
+        <img src="img/Opera.png"/>
+        <span>DOM编程艺术3</span>
+        <span>300￥</span>
+    </li>
+    <li draggable="true">
+        <img src="img/oreo-cheese.png"/>
+        <span>欧蕾芝士蛋糕</span>
+        <span>150￥</span>
+    </li>
+</ul>
+<!--</div>-->
+<!--结算区-->
+<div id="carwrap">
+    <ul id='car'>
+        <li style="font-weight:700">
+            <span class="count">数量</span>
+            <span class="pic">商品图</span>
+            <span class="name">商品名称</span>
+            <span class="price">单价格</span>
+        </li>
+
+    <div class="total" style="font-weight:700; color: red;"></div>
+    </ul>
+    
+</div>
+
+</div>
+<script>
+    //获取相关元素
+    var proUl = document.getElementById("shopping");
+    var proLiArr = proUl.children;
+    var carwrap = document.getElementById('carwrap');
+    var car = document.getElementById('car');
+    var obj = {};
+    var totalprice = 0;
+
+
+    // 1. 给每个li 绑定拖拽事件
+    for (var i = 0; i < proLiArr.length; i++) {
+        proLiArr[i].addEventListener('dragstart', function (e) {
+            //2. 拖拽开始是记录产品的名称和单价 记录数据
+            var name = this.getElementsByTagName('span')[0].innerHTML;
+            var price = this.getElementsByTagName('span')[1].innerHTML;
+            //转换价格
+            price = parseInt(price);
+            var pic = this.getElementsByTagName('img')[0].src;
+            e.dataTransfer.setData('name', name);
+            e.dataTransfer.setData('price', price);
+            e.dataTransfer.setData('pic', pic)
+        })
+
+    }
+    //3. drageover drop 取消默认事件
+    carwrap.addEventListener('dragover', function (e) {
+        e.preventDefault();
+    })
+
+    car.addEventListener('dragover', function (e) {
+        e.preventDefault();
+    })
+
+    //4. drop 通过数据传输e.dataTransfer接收商品名称和价格，并创建li
+    car.addEventListener('drop', function (e) {
+        e.preventDefault();
+        //获取数据
+        var name = e.dataTransfer.getData('name');
+        var price = e.dataTransfer.getData('price');
+        var pic = e.dataTransfer.getData('pic');
+        console.log(pic);
+        addToCar(name, price,pic);
+    })
+
+
+
+//    点击购买
+    for (var i = 0; i < proLiArr.length; i++) {
+        proLiArr[i].addEventListener('click', function () {
+            //2. 拖拽开始是记录产品的名称和单价 记录数据
+            var name = this.getElementsByTagName('span')[0].innerHTML;
+            var price = this.getElementsByTagName('span')[1].innerHTML;
+            //转换价格
+            price = parseInt(price);
+            var pic = this.getElementsByTagName('img')[0].src;
+            addToCar(name, price,pic);
+        })
+    }
+
+//封装：购物车添加商品
+function addToCar(name, price,pic){
+    //判断商品是否存在，如果不存在赋值1
+    if (!obj[name]) {
+        obj[name] = 1;
+        var newLi = document.createElement('li');
+        newLi.innerHTML =
+                '<span class="count">' + obj[name] + '</span>' +
+                '<span class="pic"><img src=" ' + pic + ' " alt=""/></span>' +
+                '<span class="name">' + name + '</span>' +
+                '<span class="price">' + price + '￥' + '</span>';
+
+        car.appendChild(newLi);
+    } else {
+        //如果已经存在则数量+1；
+        obj[name]++;
+        var namearr = document.getElementsByClassName('name');
+        var countarr = document.getElementsByClassName('count');
+        for (var i = 0; i < namearr.length; i++) {
+            if (namearr[i].innerHTML == name) {
+                //改变对应商品的数量+1；
+                countarr[i].innerHTML = obj[name];
+            }
+        }
+    }
+
+    // 计算总价格
+    var total = document.getElementsByClassName('total')[0];
+    totalprice += obj[name] * price;
+    total.innerHTML = '总价格：' + totalprice + '￥';
+}
+
+
+
+
+</script>
+</body>
+</html>
